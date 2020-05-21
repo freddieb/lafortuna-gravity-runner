@@ -37,6 +37,8 @@ void setPlayerTop(void);
 void showObstacles(void);
 void scrollLoop(uint8_t isBtnClicked);
 void gameOver(void);
+void runGame(void);
+void reset(void);
 
 void main(void) {
     init();
@@ -47,8 +49,16 @@ void main(void) {
     showPlayer();
     showObstacles();
 
-    while (!stopGame) {
-        scrollLoop(get_middle());
+    while (1) {
+        runGame();
+
+        while (get_middle() != 1) {}
+
+        reset();
+        showPlatforms();
+        showPlayer();
+        showObstacles();
+        runGame();
     }
 }
 
@@ -60,6 +70,15 @@ void init(void) {
 
     init_lcd();
     init_rotary();
+}
+
+void reset() {
+    scrollCount;
+    scrollOffset = 0;
+    size = 10;
+    isGravityDown = 1;
+    lastBtnClick = 0;
+    stopGame = 0;
 }
 
 void showPlatforms() {
@@ -190,6 +209,12 @@ void scrollLoop(uint8_t isBtnClicked) {
 
     _delay_ms(15);
     
+}
+
+void runGame() {
+    while (!stopGame) {
+        scrollLoop(get_middle());
+    }
 }
 
 void gameOver() {
