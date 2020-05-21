@@ -54,12 +54,10 @@ int8_t get_middle() {
 	if ((~PINE & _BV(PE7) && (switchpos == 0))) {
 		switchpos = 1;
 		middle = 1;
-		//_delay_is(60);
 		return 1;
 	} else { 
 		switchpos = 0;
 		middle = 0;
-		//_delay_ms(60);
 		return 0;
 	} return 0;
 }
@@ -69,5 +67,4 @@ int8_t get_middle() {
 ISR(INT7_vect)
 {
 	get_middle();
-	//_delay_ms(50);
 }

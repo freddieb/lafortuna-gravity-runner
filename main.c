@@ -1,6 +1,8 @@
-/* COMP2215: Task 02---MODEL ANSWER */
-/* For La Fortuna board.            */
+ /* Author: Freddie Brown
+ * License: MIT. See LICENSE file for more details.
+ */
 
+// Allows ms_delay to be set with a variable 
 #define __DELAY_BACKWARD_COMPATIBLE__
 
 #include <avr/io.h>
