@@ -1,6 +1,7 @@
 /* COMP2215: Task 02---MODEL ANSWER */
 /* For La Fortuna board.            */
 
+#define __DELAY_BACKWARD_COMPATIBLE__
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -24,7 +25,7 @@ rectangle obstacles[OBSTACLE_COUNT];
 int scrollCount;
 int scrollOffset = 0;
 int size = 10;
-uint8_t isGravityDown = 1;
+uint8_t isGravityDown = 0;
 int lastBtnClick = 0;
 uint8_t stopGame = 0;
 
@@ -39,6 +40,7 @@ void scrollLoop(uint8_t isBtnClicked);
 void gameOver(void);
 void runGame(void);
 void reset(void);
+void movePlayer(void);
 
 void main(void) {
     init();
@@ -73,10 +75,12 @@ void init(void) {
 }
 
 void reset() {
-    scrollCount;
+    clear_screen();
+
+    scrollCount = 0;
     scrollOffset = 0;
     size = 10;
-    isGravityDown = 1;
+    isGravityDown = 0;
     lastBtnClick = 0;
     stopGame = 0;
 }
@@ -160,6 +164,9 @@ void generateNextObstacle(int i) {
 void scrollLoop(uint8_t isBtnClicked) {
     scrollCount += 1;
 
+    // Move player if required
+    movePlayer();
+
     // Check for collisions
     for (int i = 0; i < OBSTACLE_COUNT; i++) {
         if (player.right >= obstacles[i].left) {
@@ -174,13 +181,14 @@ void scrollLoop(uint8_t isBtnClicked) {
     }
 
     // Check for button click
-    if (isBtnClicked && lastBtnClick < (scrollCount - 12)) {
+    // Increase debounce counter as scroll iteration delay decreases
+    if (isBtnClicked && scrollCount > 30 && lastBtnClick < (scrollCount - (12 + (0.03 * scrollCount)))) { 
         isGravityDown = isGravityDown ? 0 : 1;
-        if (isGravityDown) {
-            setPlayerBottom();
-        } else {
-            setPlayerTop();
-        }
+        // if (isGravityDown) {
+        //     setPlayerBottom();
+        // } else {
+        //     setPlayerTop();
+        // }
 
         lastBtnClick = scrollCount;
     }
@@ -207,8 +215,43 @@ void scrollLoop(uint8_t isBtnClicked) {
         }
     }
 
-    _delay_ms(15);
+    _delay_ms(15 - (0.01 * scrollCount));
     
+}
+
+void movePlayer() {
+    int stepSize = 6;
+
+    // Check if move required
+    if (isGravityDown == 0 && player.bottom != (HEIGHT - PLATFORM_HEIGHT)) {
+        // Should move down
+        if (player.bottom + stepSize > HEIGHT - PLATFORM_HEIGHT) {
+            stepSize = 1;//(player.bottom - (HEIGHT - PLATFORM_HEIGHT)) < 0 ? 0 : (player.bottom - (HEIGHT - PLATFORM_HEIGHT));
+        }
+
+        rectangle emptyRect = player;
+        emptyRect.bottom = player.top + stepSize;
+            
+        player.bottom = player.bottom + stepSize;
+        player.top = player.top + stepSize;
+
+        fill_rectangle(emptyRect, BLACK);
+        fill_rectangle(player, CYAN);
+    } else if (isGravityDown == 1 && player.top != PLATFORM_HEIGHT) {
+        // Should move up
+        if (player.top - stepSize < PLATFORM_HEIGHT) {
+            stepSize = 1;//player.top - PLATFORM_HEIGHT;
+        }
+
+        rectangle emptyRect = player;
+        emptyRect.top = player.bottom - stepSize;
+            
+        player.bottom = player.bottom - stepSize;
+        player.top = player.top - stepSize;
+
+        fill_rectangle(emptyRect, BLACK);
+        fill_rectangle(player, CYAN);
+    }
 }
 
 void runGame() {
@@ -220,5 +263,26 @@ void runGame() {
 void gameOver() {
     stopGame = 1;
     clear_screen();
-    display_string("Game over!");
+    
+    display_string("\n\n\n\n");
+
+    display_string("            _____                      \n");
+    display_string("           / ____|                     \n");
+    display_string("          | |  __  __ _ _ __ ___   ___ \n");
+    display_string("          | | |_ |/ _` | '_ ` _ \\ / _ \\\n");
+    display_string("          | |__| | (_| | | | | | |  __/\n");
+    display_string("           \\_____|\\__,_|_| |_| |_|\\___|\n");
+
+    display_string("\n\n");
+
+    display_string("              ____                 _ \n");
+    display_string("             / __ \\               | |\n");
+    display_string("            | |  | |_   _____ _ __| | \n");
+    display_string("            | |  | \\ \\ / / _ \\ '__| |\n");
+    display_string("            | |__| |\\ V /  __/ |  |_|\n");
+    display_string("             \\____/  \\_/ \\___|_|  (_)\n");
+
+    display_string("\n\n\n");
+
+    display_string("        Click the middle button to try again");
 }
