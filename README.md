@@ -2,7 +2,7 @@
 
 A game built for the La Routa Della Fortuna board. The aim of the game is to avoid the obstacles for as long as possible by switching the direction that gravity is acting in. 
 
-<img alt="Gravity Runner start screen" src="./docs/imgs/start_screen.jpg" width="350">
+<img alt="Gravity Runner start screen" src="./docs/imgs/demo.gif" width="350">
 
 
 ## Setup
